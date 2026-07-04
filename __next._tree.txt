@@ -1,2 +1,2 @@
-:HL["/SpecIQ/_next/static/css/bf81128ebf01d4ea.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"1bR_iLQhP92UfrYp_LrCA"}
+:HL["/SpecIQ/_next/static/css/13afd69176c110e5.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"1VU1Wi85IWRZyASdLa-xt"}
