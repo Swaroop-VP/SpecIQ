@@ -54,6 +54,17 @@ export default function Home() {
     }
   };
 
+  const getProseSizeClass = () => {
+    switch (fontSize) {
+      case 'xs': return 'prose-sm text-xs md:text-sm';
+      case 'sm': return 'prose-sm md:prose-base';
+      case 'base': return 'prose-base md:prose-lg';
+      case 'lg': return 'prose-lg md:prose-xl';
+      case 'xl': return 'prose-xl md:prose-2xl';
+      default: return 'prose-base md:prose-lg';
+    }
+  };
+
   const getFontSizeClass = () => {
     switch (fontSize) {
       case 'xs': return 'text-xs md:text-sm';
@@ -388,7 +399,7 @@ USER QUESTION: ${currentQuery}
                     {msg.role === 'user' ? (
                         <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                     ) : (
-                        <div className={`prose max-w-none pointer-events-none ${theme === 'dark' ? 'prose-invert' : ''} ${fontSize === 'xs' ? 'prose-sm text-xs' : fontSize === 'sm' ? 'prose-sm' : fontSize === 'base' ? 'prose-base' : fontSize === 'lg' ? 'prose-lg' : 'prose-xl'}`}>
+                        <div className={`prose max-w-none pointer-events-none ${theme === 'dark' ? 'prose-invert' : ''} ${getProseSizeClass()}`}>
                             <ReactMarkdown>{msg.text}</ReactMarkdown>
                         </div>
                     )}
@@ -446,7 +457,7 @@ USER QUESTION: ${currentQuery}
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <div className={`prose max-w-none pt-8 md:pt-4 ${theme === 'dark' ? 'prose-invert' : ''} ${fontSize === 'xs' ? 'prose-sm text-xs' : fontSize === 'sm' ? 'prose-sm' : fontSize === 'base' ? 'prose-base' : fontSize === 'lg' ? 'prose-lg' : 'prose-xl'}`}>
+              <div className={`prose max-w-none pt-8 md:pt-4 ${theme === 'dark' ? 'prose-invert' : ''} ${getProseSizeClass()}`}>
                 <ReactMarkdown>{messages[fullScreenMsgIndex]?.text || ''}</ReactMarkdown>
               </div>
             </div>
