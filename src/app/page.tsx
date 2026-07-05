@@ -605,7 +605,6 @@ USER QUESTION: ${currentQuery}
                   ))}
                 </div>
               </div>
-            </div>
 
               {/* Commands Help Section */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
@@ -623,7 +622,6 @@ USER QUESTION: ${currentQuery}
                 </div>
               </div>
             </div>
-
             <div className="p-5 border-t border-gray-200 dark:border-gray-800 space-y-3">
               <div className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 truncate px-2">{userEmail}</div>
               <button 
