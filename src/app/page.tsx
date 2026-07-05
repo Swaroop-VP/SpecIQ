@@ -185,9 +185,18 @@ export default function Home() {
     setLoading(true);
     setLoadingMessage('Initializing...');
 
+    // Enhance the search query with context from the last user message if the user typed a "/" indicating a follow-up
+    let searchQuery = currentQuery;
+    const lastUserMessage = messages.slice().reverse().find(m => m.role === 'user');
+    if (lastUserMessage && currentQuery.trim().startsWith('/')) {
+       // Remove the slash for the actual search query so it doesn't mess up the semantic search
+       const cleanCurrentQuery = currentQuery.trim().substring(1).trim();
+       searchQuery = lastUserMessage.text + ' ' + cleanCurrentQuery;
+    }
+
     worker.current.postMessage({
       type: 'search',
-      query: currentQuery,
+      query: searchQuery,
       documentChunks: documents
     });
 
@@ -219,20 +228,23 @@ export default function Home() {
 
           const prompt = `
 You are a highly capable technical assistant. I am providing you with the most relevant extracted text from technical specification documents, as well as the recent conversation history for context.
-Your task is to answer the user's current question accurately using ONLY the information contained within these provided specification sections.
-If the answer is not in the provided sections, state that clearly and do not make up an answer.
+Your task is to answer the user's current question accurately using ONLY the information contained within these provided specification sections AND the recent conversation history.
 
-RECENT CONVERSATION HISTORY (For context only, do not cite this):
-${historyText || 'No previous context.'}
-If the answer is not in the provided sections, state that clearly and do not make up an answer.
+CRITICAL INSTRUCTIONS FOR TONE AND ACCURACY:
+1. NEVER use robotic filler phrases like "Based on the provided documents..." or "In the provided sections...". Answer directly like an expert.
+2. If the answer cannot be found in the provided sections or history, you MUST state exactly: "I couldn't find any information about that in the CPWD specifications." Do not make up an answer.
+3. You MUST extract and reproduce the rules, clauses, and specifications EXACTLY as they are written in the provided text. Do not summarize or paraphrase technical rules.
 
 CRITICAL INSTRUCTIONS FOR CITATIONS & FORMATTING:
 1. You MUST explicitly cite the source document for every claim you make.
 2. When citing "Specs2019V1.pdf", write it as "CPWD Specifications Volume 1 2019". When citing "Specs2019V2.pdf", write it as "CPWD Specifications Volume 2 2019".
-3. You MUST identify and include the Clause Number and (if available) the Page Number in your citation. You can find page numbers marked as "--- Page X ---" in the text. If the page number is not visible in the text, simply omit it. Do NOT write "Page not specified" or similar phrases.
+3. You MUST identify and include the Clause Number and (if available) the Page Number in your citation. You can find page numbers marked as "--- Page X ---" in the text. If the page number is not visible in the text, simply omit it.
 4. You MUST format all citations in italics (e.g., *(CPWD Specifications Volume 1 2019, Clause 5.4.10.4)*).
-5. NEVER use the words "Chunk", "Section", or "Index" in your citations. Write professional, natural references.
+5. NEVER use the words "Chunk", "Section", or "Index" in your citations.
 6. Format your answers clearly using bullet points to separate different specifications, rules, or pieces of information for better readability.
+
+RECENT CONVERSATION HISTORY:
+${historyText || 'No previous context.'}
 
 ${context}
 
