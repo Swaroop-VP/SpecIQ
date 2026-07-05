@@ -227,13 +227,13 @@ export default function Home() {
           const historyText = historySlice.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n\n');
 
           const prompt = `
-You are a highly capable technical assistant. I am providing you with the most relevant extracted text from technical specification documents, as well as the recent conversation history for context.
-Your task is to answer the user's current question accurately using ONLY the information contained within these provided specification sections AND the recent conversation history.
+You are a highly capable technical assistant. I am providing you with the most relevant extracted text from technical specifications, as well as the recent conversation history for context.
+Your task is to answer the user's current question accurately using ONLY the information contained within these specifications AND the recent conversation history.
 
 CRITICAL INSTRUCTIONS FOR TONE AND ACCURACY:
-1. NEVER use robotic filler phrases like "Based on the provided documents..." or "In the provided sections...". Answer directly like an expert.
-2. If the answer cannot be found in the provided sections or history, you MUST state exactly: "I couldn't find any information about that in the CPWD specifications." Do not make up an answer.
-3. You MUST extract and reproduce the rules, clauses, and specifications EXACTLY as they are written in the provided text. Do not summarize or paraphrase technical rules.
+1. NEVER use robotic filler phrases like "Based on the provided documents...", "In the provided sections...", or "provided text". Answer directly like an expert.
+2. If the answer cannot be found in the specifications or history, you MUST state exactly: "I couldn't find any information about that in the specifications." Do not make up an answer.
+3. You MUST extract and reproduce the rules, clauses, and specifications EXACTLY as they are written in the database. Do not summarize or paraphrase technical rules.
 
 CRITICAL INSTRUCTIONS FOR CITATIONS & FORMATTING:
 1. You MUST explicitly cite the source document for every claim you make.
@@ -382,7 +382,7 @@ USER QUESTION: ${currentQuery}
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <div className="text-gray-500 dark:text-gray-400 text-lg font-medium tracking-wide animate-pulse">
-              Loading database...
+              Loading...
             </div>
           </div>
         )}
@@ -390,7 +390,7 @@ USER QUESTION: ${currentQuery}
         {messages.length === 0 && documents.length > 0 && !dataLoadError && (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
              <div className="flex items-center justify-center py-6 text-gray-500 dark:text-gray-400 text-center px-4 md:px-8 text-lg font-medium">
-               Ask any query from CPWD Specifications (Volume 1 & 2).
+               Ask any query from CPWD Specifications (Volume 1 & 2)
              </div>
           </div>
         )}
