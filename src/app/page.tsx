@@ -185,13 +185,65 @@ export default function Home() {
     setLoading(true);
     setLoadingMessage('Initializing...');
 
-    // Enhance the search query with context from the last user message if the user typed a "/" indicating a follow-up
     let searchQuery = currentQuery;
+    let isGenericMode = false;
+    let isFollowUpMode = false;
+
     const lastUserMessage = messages.slice().reverse().find(m => m.role === 'user');
-    if (lastUserMessage && currentQuery.trim().startsWith('/')) {
-       // Remove the slash for the actual search query so it doesn't mess up the semantic search
-       const cleanCurrentQuery = currentQuery.trim().substring(1).trim();
-       searchQuery = lastUserMessage.text + ' ' + cleanCurrentQuery;
+    
+    if (currentQuery.trim().startsWith('@')) {
+       isFollowUpMode = true;
+       if (lastUserMessage) {
+         const cleanCurrentQuery = currentQuery.trim().substring(1).trim();
+         searchQuery = lastUserMessage.text + ' ' + cleanCurrentQuery;
+       }
+    } else if (currentQuery.trim().startsWith('/')) {
+       isGenericMode = true;
+    }
+
+    if (isGenericMode) {
+      setLoadingMessage('Thinking...');
+      
+      try {
+          const historyLength = Math.min(newMessages.length - 1, 4);
+          const historySlice = newMessages.slice(-(historyLength + 1), -1);
+          const historyText = historySlice.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n\n');
+
+          const genericPrompt = `You are a highly capable general AI assistant. 
+Your task is to answer the user's current question using your vast general knowledge.
+The user is asking a general question outside the scope of their typical technical specifications database.
+
+RECENT CONVERSATION HISTORY:
+${historyText || 'No previous context.'}
+
+USER QUESTION: ${currentQuery}
+`;
+
+          const response = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'generate', email: userEmail, token: sessionToken, prompt: genericPrompt })
+          });
+
+          const data = await response.json();
+          const isError = data.status === 'error' || data.error;
+          const errorText = data.message || data.error || "Unknown Error";
+
+          if (isError) {
+             if (errorText.includes('Session Invalid')) { handleLogout(errorText); return; }
+             setMessages([...newMessages, { role: 'assistant', text: "*I encountered an issue. Please try again.*" }]);
+          } else {
+             const answer = data.text || data.result || "*I encountered an issue processing that query.*";
+             setMessages([...newMessages, { role: 'assistant', text: answer }]);
+          }
+      } catch (err: any) {
+          console.error(err);
+          setMessages([...newMessages, { role: 'assistant', text: "*Please check your internet connection and try again.*" }]);
+      } finally {
+          setLoading(false);
+          setLoadingMessage('');
+      }
+      return;
     }
 
     worker.current.postMessage({
@@ -233,7 +285,7 @@ Your task is to answer the user's current question accurately using ONLY the inf
 CRITICAL INSTRUCTIONS FOR TONE AND ACCURACY:
 1. NEVER use robotic filler phrases like "Based on the provided documents...", "In the provided sections...", or "provided text". Answer directly like an expert.
 2. If the answer cannot be found in the specifications or history, you MUST state exactly: "I couldn't find any information about that in the specifications." Do not make up an answer.
-3. You MUST extract and reproduce the rules, clauses, and specifications EXACTLY as they are written in the database. Do not summarize or paraphrase technical rules.
+3. You MUST extract and reproduce the rules, clauses, and specifications EXACTLY as they are written in the database. Do not summarize or paraphrase technical rules UNLESS the user explicitly asks you to explain or summarize them.
 
 CRITICAL INSTRUCTIONS FOR CITATIONS & FORMATTING:
 1. You MUST explicitly cite the source document for every claim you make.
@@ -357,23 +409,18 @@ USER QUESTION: ${currentQuery}
   }
 
   return (
-    <main className={`fixed inset-0 flex flex-col items-center p-4 md:p-8 transition-colors ${theme === 'dark' ? 'dark bg-[#0f172a] text-gray-100' : 'bg-gray-50 text-gray-900'}`} style={getFontFamilyStyle()}>
+    <main className={`fixed inset-0 flex flex-col items-center pt-16 md:pt-20 p-4 md:p-8 transition-colors ${theme === 'dark' ? 'dark bg-[#0f172a] text-gray-100' : 'bg-gray-50 text-gray-900'}`} style={getFontFamilyStyle()}>
       <div className="flex flex-col w-full max-w-3xl h-full relative">
-        <div className="flex-none relative flex justify-center items-center mb-4 md:mb-6 w-full min-h-[40px]">
-            <span className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-full text-sm text-gray-700 dark:text-gray-300 truncate max-w-[300px] shadow-sm z-10">
-              {userEmail}
-            </span>
-            <button 
-                onClick={() => setIsSettingsOpen(true)}
-                className="absolute right-0 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-10"
-                title="Settings"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 md:w-5 md:h-5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            </button>
-        </div>
+        <button 
+            onClick={() => setIsSettingsOpen(true)}
+            className="absolute -top-12 md:-top-16 -right-2 md:-right-6 p-2 md:p-2.5 rounded-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-gray-800 transition-all z-30"
+            title="Settings"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 md:w-7 md:h-7">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
         
         {documents.length === 0 && !dataLoadError && (
           <div className="flex-1 flex flex-col items-center justify-center text-center px-4 space-y-4">
@@ -560,7 +607,25 @@ USER QUESTION: ${currentQuery}
               </div>
             </div>
 
-            <div className="p-5 border-t border-gray-200 dark:border-gray-800">
+              {/* Commands Help Section */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+                <label className="block text-[11px] font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">COMMANDS</label>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Start your query with:</p>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <span className="flex-none flex items-center justify-center w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm">@</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">- To add the query to your previous few queries</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <span className="flex-none flex items-center justify-center w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm">/</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">- To ask any general question out of CPWD Specifications</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-gray-200 dark:border-gray-800 space-y-3">
+              <div className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 truncate px-2">{userEmail}</div>
               <button 
                 onClick={() => {
                   setIsSettingsOpen(false);
