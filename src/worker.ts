@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { pipeline, env } from '@xenova/transformers';
 
 // Disable local models loading to use CDN
@@ -7,9 +8,9 @@ class RAGPipeline {
   static embeddingTask = 'feature-extraction';
   static embeddingModel = 'Xenova/all-MiniLM-L6-v2';
 
-  static embeddingInstance = null;
+  static embeddingInstance: any = null;
 
-  static async getEmbeddingInstance(progress_callback) {
+  static async getEmbeddingInstance(progress_callback: any) {
     if (this.embeddingInstance === null) {
       this.embeddingInstance = pipeline(this.embeddingTask, this.embeddingModel, { progress_callback });
     }

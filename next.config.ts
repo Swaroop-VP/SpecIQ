@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'export',
+  basePath: '/SpecIQ',
   // Disable image optimization because GitHub Pages doesn't support it
   images: { unoptimized: true },
   webpack: (config) => {
