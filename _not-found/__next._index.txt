@@ -1,5 +1,5 @@
 1:"$Sreact.fragment"
 2:I[7121,[],""]
 3:I[4581,[],""]
-:HL["/SpecIQ/_next/static/css/e7f3b379dd363663.css","style"]
-0:{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/SpecIQ/_next/static/css/e7f3b379dd363663.css","precedence":"next"}]],["$","html",null,{"lang":"en","className":"__variable_a550fa __variable_699250 h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col","children":["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"nVkLnJQdOlSS3FMrvgROb"}
+:HL["/SpecIQ/_next/static/css/c3d3c454a697ff1b.css","style"]
+0:{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/SpecIQ/_next/static/css/c3d3c454a697ff1b.css","precedence":"next"}]],["$","html",null,{"lang":"en","className":"__variable_a550fa __variable_699250 h-full antialiased","children":["$","body",null,{"className":"min-h-full flex flex-col","children":["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"rsKpPzt0uudUUCJ0KVSUh"}
