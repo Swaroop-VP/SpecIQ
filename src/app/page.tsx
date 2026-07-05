@@ -18,12 +18,15 @@ export default function Home() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [theme, setTheme] = useState('dark');
   const [fontSize, setFontSize] = useState('base');
+  const [fontFamily, setFontFamily] = useState('default');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('speciq-theme') || 'dark';
     const savedFontSize = localStorage.getItem('speciq-fontsize') || 'base';
+    const savedFontFamily = localStorage.getItem('speciq-fontfamily') || 'default';
     setTheme(savedTheme);
     setFontSize(savedFontSize);
+    setFontFamily(savedFontFamily);
   }, []);
 
   const handleThemeChange = (newTheme: string) => {
@@ -34,6 +37,21 @@ export default function Home() {
   const handleFontSizeChange = (newSize: string) => {
     setFontSize(newSize);
     localStorage.setItem('speciq-fontsize', newSize);
+  };
+
+  const handleFontFamilyChange = (newFont: string) => {
+    setFontFamily(newFont);
+    localStorage.setItem('speciq-fontfamily', newFont);
+  };
+
+  const getFontFamilyStyle = () => {
+    switch (fontFamily) {
+      case 'arial': return { fontFamily: 'Arial, sans-serif' };
+      case 'times': return { fontFamily: '"Times New Roman", Times, serif' };
+      case 'calibri': return { fontFamily: 'Calibri, sans-serif' };
+      case 'georgia': return { fontFamily: 'Georgia, serif' };
+      default: return {}; // Uses Tailwind default sans
+    }
   };
 
   const getFontSizeClass = () => {
@@ -183,9 +201,18 @@ export default function Home() {
               context += `\n--- END SECTION ---\n\n`;
           });
 
+          // Grab the last 4 messages for context (exclude the very last one which is the current query added locally)
+          const historyLength = Math.min(newMessages.length - 1, 4);
+          const historySlice = newMessages.slice(-(historyLength + 1), -1);
+          const historyText = historySlice.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n\n');
+
           const prompt = `
-You are a highly capable technical assistant. I am providing you with the most relevant extracted text from technical specification documents.
-Your task is to answer the user's question accurately using ONLY the information contained within these provided sections.
+You are a highly capable technical assistant. I am providing you with the most relevant extracted text from technical specification documents, as well as the recent conversation history for context.
+Your task is to answer the user's current question accurately using ONLY the information contained within these provided specification sections.
+If the answer is not in the provided sections, state that clearly and do not make up an answer.
+
+RECENT CONVERSATION HISTORY (For context only, do not cite this):
+${historyText || 'No previous context.'}
 If the answer is not in the provided sections, state that clearly and do not make up an answer.
 
 CRITICAL INSTRUCTIONS FOR CITATIONS & FORMATTING:
@@ -307,7 +334,7 @@ USER QUESTION: ${currentQuery}
   }
 
   return (
-    <main className={`fixed inset-0 flex flex-col items-center p-4 md:p-8 transition-colors ${theme === 'dark' ? 'dark bg-[#0f172a] text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
+    <main className={`fixed inset-0 flex flex-col items-center p-4 md:p-8 transition-colors ${theme === 'dark' ? 'dark bg-[#0f172a] text-gray-100' : 'bg-gray-50 text-gray-900'}`} style={getFontFamilyStyle()}>
       <div className="flex flex-col w-full max-w-3xl h-full relative">
         <div className="flex-none relative flex justify-center items-center mb-4 md:mb-6 w-full min-h-[40px]">
             <span className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-full text-sm text-gray-700 dark:text-gray-300 truncate max-w-[300px] shadow-sm z-10">
@@ -361,7 +388,7 @@ USER QUESTION: ${currentQuery}
                     {msg.role === 'user' ? (
                         <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
                     ) : (
-                        <div className={`prose max-w-none pointer-events-none ${theme === 'dark' ? 'prose-invert' : ''} ${fontSize === 'xs' || fontSize === 'sm' ? 'prose-sm' : (fontSize === 'lg' || fontSize === 'xl' ? 'prose-lg' : 'prose-base')}`}>
+                        <div className={`prose max-w-none pointer-events-none ${theme === 'dark' ? 'prose-invert' : ''} ${fontSize === 'xs' ? 'prose-sm text-xs' : fontSize === 'sm' ? 'prose-sm' : fontSize === 'base' ? 'prose-base' : fontSize === 'lg' ? 'prose-lg' : 'prose-xl'}`}>
                             <ReactMarkdown>{msg.text}</ReactMarkdown>
                         </div>
                     )}
@@ -419,7 +446,7 @@ USER QUESTION: ${currentQuery}
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <div className={`prose max-w-none pt-8 md:pt-4 ${theme === 'dark' ? 'prose-invert' : ''} ${fontSize === 'xs' || fontSize === 'sm' ? 'prose-sm' : (fontSize === 'lg' || fontSize === 'xl' ? 'prose-lg' : 'prose-base')}`}>
+              <div className={`prose max-w-none pt-8 md:pt-4 ${theme === 'dark' ? 'prose-invert' : ''} ${fontSize === 'xs' ? 'prose-sm text-xs' : fontSize === 'sm' ? 'prose-sm' : fontSize === 'base' ? 'prose-base' : fontSize === 'lg' ? 'prose-lg' : 'prose-xl'}`}>
                 <ReactMarkdown>{messages[fullScreenMsgIndex]?.text || ''}</ReactMarkdown>
               </div>
             </div>
@@ -464,19 +491,42 @@ USER QUESTION: ${currentQuery}
               {/* Font Size Selector */}
               <div>
                 <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Font Size</label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-nowrap gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                   {['xs', 'sm', 'base', 'lg', 'xl'].map((size) => {
-                    const labels: Record<string, string> = { 'xs': 'Extra Small', 'sm': 'Small', 'base': 'Medium', 'lg': 'Large', 'xl': 'Extra Large' };
+                    const textClass: Record<string, string> = { 'xs': 'text-xs', 'sm': 'text-sm', 'base': 'text-base', 'lg': 'text-lg', 'xl': 'text-xl' };
                     return (
                       <button
                         key={size}
                         onClick={() => handleFontSizeChange(size)}
-                        className={`flex-1 py-2 px-2 min-w-[30%] text-sm font-medium rounded-lg border ${fontSize === size ? 'bg-blue-50 dark:bg-[#2c3e50] text-blue-700 dark:text-blue-100 border-blue-500' : 'bg-white dark:bg-[#2d3748] text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                        className={`flex-1 py-2 px-1 flex items-center justify-center font-medium rounded-lg transition-all ${fontSize === size ? 'bg-white dark:bg-[#2c3e50] text-blue-600 dark:text-blue-400 shadow-sm border border-gray-200 dark:border-gray-600' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 border border-transparent'}`}
                       >
-                        {labels[size]}
+                        <span className={textClass[size]}>A</span>
                       </button>
                     )
                   })}
+                </div>
+              </div>
+
+              {/* Font Family Selector */}
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Font Family</label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { id: 'default', label: 'Default', style: {} },
+                    { id: 'arial', label: 'Arial', style: { fontFamily: 'Arial, sans-serif' } },
+                    { id: 'calibri', label: 'Calibri', style: { fontFamily: 'Calibri, sans-serif' } },
+                    { id: 'times', label: 'Times New Roman', style: { fontFamily: '"Times New Roman", Times, serif' } },
+                    { id: 'georgia', label: 'Georgia', style: { fontFamily: 'Georgia, serif' } }
+                  ].map((font) => (
+                    <button
+                      key={font.id}
+                      onClick={() => handleFontFamilyChange(font.id)}
+                      style={font.style}
+                      className={`py-1.5 px-3 text-sm rounded-full border transition-all ${fontFamily === font.id ? 'bg-blue-50 dark:bg-[#2c3e50] text-blue-700 dark:text-blue-100 border-blue-500 shadow-sm' : 'bg-white dark:bg-[#2d3748] text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                    >
+                      {font.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
