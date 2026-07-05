@@ -606,30 +606,44 @@ USER QUESTION: ${currentQuery}
                 </div>
               </div>
 
-              {/* Commands Help Section */}
+              {/* Controls Section */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-                <label className="block text-[11px] font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">COMMANDS</label>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Start your query with:</p>
+                <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">CONTROLS</label>
                 <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <span className="flex-none flex items-center justify-center w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm">@</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">- To add the query to your previous few queries</span>
+                  <div className="flex items-center gap-3">
+                    <span className="flex-none flex items-center justify-center w-7 h-7 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-white/5">@</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">Ask a follow-up query</span>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <span className="flex-none flex items-center justify-center w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm">/</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">- To ask any general question out of CPWD Specifications</span>
+                  <div className="flex items-center gap-3">
+                    <span className="flex-none flex items-center justify-center w-7 h-7 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-white/5">/</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">Ask any general query</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="p-5 border-t border-gray-200 dark:border-gray-800 space-y-3">
-              <div className="text-center text-xs font-medium text-gray-500 dark:text-gray-400 truncate px-2">{userEmail}</div>
+            
+            {/* Login Details Section */}
+            <div className="p-5 border-t border-gray-200 dark:border-gray-800">
+              <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">LOGIN DETAILS</label>
+              
+              <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-xl p-3 flex items-center gap-3 mb-4 shadow-sm">
+                <div className="flex-none w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="truncate flex-1">
+                  <div className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Account</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{userEmail}</div>
+                </div>
+              </div>
+
               <button 
                 onClick={() => {
                   setIsSettingsOpen(false);
                   handleLogout();
                 }}
-                className="w-full flex items-center justify-center gap-2 bg-white dark:bg-[#2d3748] hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 font-medium py-3 px-4 rounded-lg shadow-sm border border-red-200 dark:border-red-900/50 transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-semibold py-3 px-4 rounded-xl shadow-sm transition-colors border border-red-100 dark:border-red-900/30"
               >
                 Sign Out
               </button>
