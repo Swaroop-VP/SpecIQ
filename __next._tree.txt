@@ -1,2 +1,2 @@
 :HL["/SpecIQ/_next/static/css/9d3912825855af30.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"tHxvVbCjMYJYEJ0mGnOVU"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"aVOtLiJwsM3N03KUZp6r0"}
