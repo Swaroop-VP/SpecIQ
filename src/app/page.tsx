@@ -231,7 +231,7 @@ USER QUESTION: ${currentQuery}
 
           if (isError) {
              if (errorText.includes('Session Invalid')) { handleLogout(errorText); return; }
-             setMessages([...newMessages, { role: 'assistant', text: "*I encountered an issue. Please try again.*" }]);
+             setMessages([...newMessages, { role: 'assistant', text: `*Error: ${errorText}*` }]);
           } else {
              const answer = data.text || data.result || "*I encountered an issue processing that query.*";
              setMessages([...newMessages, { role: 'assistant', text: answer }]);
@@ -409,11 +409,11 @@ USER QUESTION: ${currentQuery}
   }
 
   return (
-    <main className={`fixed inset-0 flex flex-col items-center pt-16 md:pt-20 p-4 md:p-8 transition-colors ${theme === 'dark' ? 'dark bg-[#0f172a] text-gray-100' : 'bg-gray-50 text-gray-900'}`} style={getFontFamilyStyle()}>
+    <main className={`fixed inset-0 flex flex-col items-center p-4 md:p-8 transition-colors ${theme === 'dark' ? 'dark bg-[#0f172a] text-gray-100' : 'bg-gray-50 text-gray-900'}`} style={getFontFamilyStyle()}>
       <div className="flex flex-col w-full max-w-3xl h-full relative">
         <button 
             onClick={() => setIsSettingsOpen(true)}
-            className="absolute -top-12 md:-top-16 -right-2 md:-right-6 p-2 md:p-2.5 rounded-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-gray-800 transition-all z-30"
+            className="fixed top-4 right-4 md:top-6 md:right-6 p-2.5 md:p-3 rounded-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-gray-800 transition-all z-40"
             title="Settings"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 md:w-7 md:h-7">
@@ -530,9 +530,11 @@ USER QUESTION: ${currentQuery}
         )}
 
         {/* Settings Drawer */}
-        <div className={`fixed inset-y-0 right-0 w-80 bg-white dark:bg-[#1a202c] shadow-2xl border-l border-gray-200 dark:border-gray-800 z-50 transform transition-transform duration-300 ease-in-out ${isSettingsOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-800">
+        <div 
+          className={`fixed inset-y-0 right-0 w-80 bg-white dark:bg-[#1a202c] shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${isSettingsOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          style={getFontFamilyStyle()}
+        >
+          <div className="flex-none p-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-[#1a202c]">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Settings</h2>
               <button 
                 onClick={() => setIsSettingsOpen(false)}
@@ -598,7 +600,7 @@ USER QUESTION: ${currentQuery}
                       key={font.id}
                       onClick={() => handleFontFamilyChange(font.id)}
                       style={font.style}
-                      className={`py-1.5 px-3 text-sm rounded-full border transition-all ${fontFamily === font.id ? 'bg-blue-50 dark:bg-[#2c3e50] text-blue-700 dark:text-blue-100 border-blue-500 shadow-sm' : 'bg-white dark:bg-[#2d3748] text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                      className={`flex items-center justify-center h-8 px-3 text-sm rounded-full border transition-all ${fontFamily === font.id ? 'bg-blue-50 dark:bg-[#2c3e50] text-blue-700 dark:text-blue-100 border-blue-500 shadow-sm' : 'bg-white dark:bg-[#2d3748] text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     >
                       {font.label}
                     </button>
@@ -612,11 +614,11 @@ USER QUESTION: ${currentQuery}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <span className="flex-none flex items-center justify-center w-7 h-7 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-white/5">@</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">Ask a follow-up query</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">Ask a follow-up query</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="flex-none flex items-center justify-center w-7 h-7 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs font-mono font-bold text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-white/5">/</span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed font-medium">Ask any general query</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-medium">Ask any general query</span>
                   </div>
                 </div>
               </div>
@@ -633,7 +635,7 @@ USER QUESTION: ${currentQuery}
                   </svg>
                 </div>
                 <div className="truncate flex-1">
-                  <div className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Account</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Account</div>
                   <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{userEmail}</div>
                 </div>
               </div>
@@ -643,7 +645,7 @@ USER QUESTION: ${currentQuery}
                   setIsSettingsOpen(false);
                   handleLogout();
                 }}
-                className="w-full flex items-center justify-center gap-2 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-600 dark:text-red-400 font-semibold py-3 px-4 rounded-xl shadow-sm transition-colors border border-red-100 dark:border-red-900/30"
+                className="w-full flex items-center justify-center gap-2 bg-red-50/50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold py-3 px-4 rounded-xl shadow-sm transition-colors border border-red-200/50 dark:border-red-900/30"
               >
                 Sign Out
               </button>
